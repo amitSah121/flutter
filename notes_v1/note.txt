@@ -1,0 +1,76 @@
+{
+  "username": "John",
+  "password": "8d969eef6ecad3c29a3a629280e686cf0c3f5d5a86aff3ca12020c923adc6c92",
+  "notes": {
+    "20241012010112": {
+      "index": [
+        110210,
+        120210,
+        130210,
+        130220
+      ],
+      "type": "hierarchy__5050__text__5050__text__5050__text__5050__media",
+      "content": "Home>Tags__5050__orange,inter%italic__5050__Hello man?__5050__100,50,left__5050__How have you been since?__5050__100,50,left__5050__I am just enhoying vacation.__5050__100,50,left__5050__f404af09ff317b933ec40c1c9be0925f.png__5050__100,50,center"
+    },
+    
+    "20241013010111": {
+      "index": [
+        110210,
+        120210,
+        130210,
+        130220
+      ],
+      "type": "hierarchy__5050__text__5050__text__5050__text__5050__media",
+      "content": "Home__5050__orange,inter%italic__5050__Today I will be going somewhere else and I want myself to be in the perfect spot so that I can view the mountain so clearly that not even i can tell it apart from my dreams__5050__100,50,left__5050__Yeah, its been a dream of mine to live in certain thing called peace from childhood doing whatever I can to make things better__5050__100,50,left__5050__But its fine even if it takes a little more time thsn usual.__5050__100,50,left__5050__f404af09ff317b933ec40c1c9be0925f.png__5050__100,50,center"
+    },
+    "20241002010110": {
+      "index": [
+        110210,
+        120210,
+        130210,
+        130220
+      ],
+      "type": "hierarchy__5050__text__5050__text__5050__text__5050__media",
+      "content": "__5050__orange,inter%italic__5050__Its the second day of what I would call as the best day of someones life.__5050__100,50,left__5050__And that someone is me.__5050__100,50,left__5050__So, enjoy my vacation as much as i want.__5050__100,50,left__5050__f404af09ff317b933ec40c1c9be0925f.png__5050__100,50,center"
+    },
+    "20241003010101": {
+      "index": [
+        110210,
+        120210,
+        130210,
+        130220
+      ],
+      "type": "hierarchy__5050__text__5050__text__5050__text__5050__media",
+      "content": "__5050__orange,inter%italic__5050__Third day for enjoying of what I would call as the best day of someones life.__5050__100,50,left__5050__And that someone is me.__5050__100,50,left__5050__So, enjoy my vacation as much as i want.__5050__100,50,left__5050__f404af09ff317b933ec40c1c9be0925f.png__5050__100,50,center"
+    },
+
+
+    "hierarchy": {
+      "index": [
+        0
+      ],
+      "type": "text",
+      "content": "Home>Tags;Docs>readings>common;Note>First>Only;Note>Second"
+    }
+  }
+}
+
+
+note id is year,month,day,hour,minute,second
+
+
+The index is as 1 = row, 2 = column, 0= spacer for next iteration, row and column starts from 1 , assume list contains everything orderly
+  e.g. [110210] meaning row 1st, colunm 1st, and likewise the dimension goes on, ..., index contains multiple of these [110210, 110220, ......]
+The type can be text, media, or hidden
+  Hidden is used for internal purpose only, and index is used to represent different types, index = 0 (for tag hierarchy)
+  
+id will be equal to initially created date
+content of hierarchy is as e.g., text>text>text>text;pext>pext
+
+
+content of normal will be like "hierarchy__5050__textcontent__5050__textcontent__5050__mediapath__5050__textcontent" // note: __5050__ is separation
+type is in the form "test>text__5050__background_color,font__5050__text__5050__width,height,alignment__5050__text__5050__width,height,alignment__5050__media__5050__width,height,alignment__5050__text"
+
+// note the first one is the tag hierarchy the note is present in , if blank then by default it is present in root, also after each of "text" or "media" , __5050__width,height,alignment__5050__ comes
+
+type meaning hierarchy__5050__text__5050__.........., represents how the content is arranged

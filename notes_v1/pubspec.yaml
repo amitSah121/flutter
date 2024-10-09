@@ -1,0 +1,27 @@
+name: notes_v1
+description: "A new Flutter project."
+publish_to: 'none'
+version: 0.1.0
+
+environment:
+  sdk: ^3.5.2
+
+dependencies:
+  crypto: ^3.0.5
+  flutter:
+    sdk: flutter
+  flutter_colorpicker: ^1.1.0
+  flutter_markdown: ^0.7.3+2
+  flutter_material_color_picker: ^1.2.0
+  http: ^1.2.2
+  provider: ^6.1.2
+
+dev_dependencies:
+  flutter_test:
+    sdk: flutter
+  flutter_lints: ^4.0.0
+
+flutter:
+  uses-material-design: true
+  assets:
+    - assets/images/

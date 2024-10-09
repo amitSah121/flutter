@@ -1,0 +1,26 @@
+## format
+{   
+    
+    username:{
+        title,
+        date_of_modification,
+        cells:[
+            {
+                type: text,
+                content: content,
+                height:,
+                width:,
+                color:,
+                alignment:,
+            },
+            {
+                type: media,
+                media_type: image,
+                content: content.link,
+                height:,
+                width:,
+            }
+        ]
+    }
+    
+}
