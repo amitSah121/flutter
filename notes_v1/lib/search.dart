@@ -99,6 +99,7 @@ class _SearchState extends State<Search> {
                       alignment: Alignment.center,
                       child: TextField(
                         controller: searchController,
+                        autofocus: true,
                         decoration: const InputDecoration(hintText: "Search"),
                         onSubmitted: (value){
                           Future.microtask(() async{

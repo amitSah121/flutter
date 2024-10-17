@@ -1,6 +1,7 @@
 import 'dart:io';
 import 'package:dart_frog/dart_frog.dart';
 import 'package:mongo_dart/mongo_dart.dart';
+import 'package:notes_v1/helper_funcs/helper.dart';
 import 'package:notes_v1/json/json.dart';
 
 
@@ -16,7 +17,7 @@ Future<Response> login(context) async{
   final request = context.request;
   final params = request.uri.queryParameters;
 
-  final db = Db('mongodb://admin:password@localhost:27017/user_account?authSource=admin');
+  final db = Db(uri);
   await db.open();
   final coll = db.collection('user');
   
@@ -53,7 +54,7 @@ Future<Response> register(context)async{
   final request = context.request;
   final body = await request.json() as Map<String, dynamic>;
   // final params = request.uri.queryParameters;
-  final db = Db('mongodb://admin:password@localhost:27017/user_account?authSource=admin');
+  final db = Db(uri);
   await db.open();
   final coll = db.collection('user');
   
@@ -66,7 +67,7 @@ Future<Response> register(context)async{
 
   if(temp_1.isEmpty ){
     await coll.insertOne(
-      {'username': username, 'password': password,'notes':null},
+      {'username': username, 'password': password,'notes':'{"note":{"hierarchy": {"index": [0],"type": "text","content": ""}}}'},
     );
     await db.close();
     return Response(body: 'log_in');

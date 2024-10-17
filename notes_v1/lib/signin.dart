@@ -19,25 +19,25 @@ Future<String> getData(username, password) async {
       throw Exception('Failed to load data');
     }
   } catch (e) {
-    return 'Error: $e';
+    return 'invalid';
   }
 }
 
-Future<String> getNotes(username, password) async {
-  try {
-    var newpass = sha256.convert(utf8.encode(password.toString()));
-    var url = Uri.parse('http://localhost:8080/notes?username=$username&password=${newpass.toString()}');
-    var response = await http.get(url);
-    if (response.statusCode == 200) {
-      // print(newpass);
-      return response.body;
-    } else {
-      throw Exception('Failed to load data');
-    }
-  } catch (e) {
-    return 'Error: $e';
-  }
-}
+// Future<String> getNotes(username, password) async {
+//   try {
+//     var newpass = sha256.convert(utf8.encode(password.toString()));
+//     var url = Uri.parse('http://localhost:8080/notes?username=$username&password=${newpass.toString()}');
+//     var response = await http.get(url);
+//     if (response.statusCode == 200) {
+//       // print(newpass);
+//       return response.body;
+//     } else {
+//       throw Exception('Failed to load data');
+//     }
+//   } catch (e) {
+//     return 'Error: $e';
+//   }
+// }
 
 
 class SignIn extends StatefulWidget {

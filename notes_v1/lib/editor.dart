@@ -3,8 +3,10 @@ import 'package:crypto/crypto.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_markdown/flutter_markdown.dart';
+import 'package:image_picker/image_picker.dart';
 import 'package:notes_v1/appNoteClasses.dart';
 import 'package:notes_v1/constants.dart';
+import 'package:path_provider/path_provider.dart';
 import 'dart:convert';
 import 'package:provider/provider.dart';
 import 'package:notes_v1/provider.dart';
@@ -219,220 +221,261 @@ class _EditorState extends State<Editor> {
       return int.parse(ele);
     }).toList();
     // print(t2);
-    return Scaffold(
-      backgroundColor: Color.fromARGB(t2[3],t2[0],t2[1],t2[2]),
-      appBar: AppBar(
-        backgroundColor: Colors.amber,
-        title: const Text(
-          "Get Go",
-          style: TextStyle(
-            fontSize: 24,
-            fontWeight: FontWeight.bold,
+    return WillPopScope(
+      onWillPop: ()async{
+        Future.microtask(()async{
+          var myModel = Provider.of<CustomProvider>(context,listen: false);
+          var crr = jsonDecode(myModel.currentNote!.parseContent().toString());
+          // print(crr);
+          var sections = [];
+          sections.add({"content":crr["sections"][0]["content"]});
+          sections.add({"width":bgcolor,"height":font,"alignment":"null"});
+          List<int> indexes = [];
+          List<dynamic> type = [];
+          type.add({"content":"hierarchy"});
+          for(int i=0 ; i<temp.length; i++){
+            var temp_1 = temp[i];
+            for(int j=0 ; j<temp_1.mat.length; j++){
+              var temp_2 = temp_1.mat[j];
+              for(int k=0 ; k<temp_2.length ; k++){
+                var temp_3 = temp_2[k];
+                indexes.add((10000000*(i+11)+10000*(j+21)+10*(k+11)));
+                var t1 = temp_3.toString().split("-");
+                sections.add({"content":t1[0]});
+                var t2 = t1[1].split(",");
+                sections.add({"width":double.parse(t2[0]),"height":double.parse(t2[1]),"alignment":t2[2]});
+                type.add({"content":temp_3.type});
+              }
+            }
+          }
+          crr["sections"] = sections;
+          ReverseNote n1 = ReverseNote(
+            id: myModel.currentNote!.id,
+            index: indexes, 
+            content: sections, 
+            type: type
+          );
+          // print(type);
+          myModel.addNote(convertNoteAndHierarchy([n1],null));
+          // print(convertNoteAndHierarchy([n1],null)['"note"']);
+        });
+        return true;
+      },
+      child: Scaffold(
+        backgroundColor: Color.fromARGB(t2[3],t2[0],t2[1],t2[2]),
+        appBar: AppBar(
+          backgroundColor: Colors.amber,
+          title: const Text(
+            "Get Go",
+            style: TextStyle(
+              fontSize: 24,
+              fontWeight: FontWeight.bold,
+            ),
           ),
-        ),
-        actions: [
-          IconButton(
-            onPressed: (){
-              showDialog(
-                context: context,
-                builder: (context) {
-                  return AlertDialog(
-                    alignment: Alignment.topRight,
-                    title: const Text('Settings'),
-                    content: Container(
-                      alignment: Alignment.topLeft,
-                      // decoration: BoxDecoration(color:Colors.red),
-                      width: 200,
-                      height: 150,
-                      child: Column(
-                        mainAxisSize: MainAxisSize.max,
-                        mainAxisAlignment: MainAxisAlignment.start,
-                        children: [
-                          SizedBox(
-                            width: 250,
-                            height: 50,
-                            child: ListTile(
-                              title: const Text("Background-Color"),
-                              leading: Container(
-                                width: 20,
-                                height: 20,
-                                decoration: BoxDecoration(color: Color.fromARGB(t2[3],t2[0],t2[1],t2[2])),
-                              ),
-                              onTap: (){
-                                Navigator.pop(context);
-                                showDialog(
-                                  context: context, 
-                                  builder: (context){
-                                    var c1 = bgcolor;
-                                    return AlertDialog(
-                                      content: MaterialColorPicker(
-                                        onColorChange: (v){
-                                          c1 = '${v.red};${v.green};${v.blue};${v.alpha}';
-                                        },
-                                        selectedColor: Colors.white,
-                                        colors: const [
-                                            Colors.red,
-                                            Colors.yellow,
-                                            Colors.lightGreen,
-                                            Colors.grey,
-                                            Colors.amber,
-                                            Colors.cyan,
-                                            Colors.brown,
-                                            Colors.indigo,
+          actions: [
+            IconButton(
+              onPressed: (){
+                showDialog(
+                  context: context,
+                  builder: (context) {
+                    return AlertDialog(
+                      alignment: Alignment.topRight,
+                      title: const Text('Settings'),
+                      content: Container(
+                        alignment: Alignment.topLeft,
+                        // decoration: BoxDecoration(color:Colors.red),
+                        width: 200,
+                        height: 150,
+                        child: Column(
+                          mainAxisSize: MainAxisSize.max,
+                          mainAxisAlignment: MainAxisAlignment.start,
+                          children: [
+                            SizedBox(
+                              width: 250,
+                              height: 50,
+                              child: ListTile(
+                                title: const Text("Background-Color"),
+                                leading: Container(
+                                  width: 20,
+                                  height: 20,
+                                  decoration: BoxDecoration(color: Color.fromARGB(t2[3],t2[0],t2[1],t2[2])),
+                                ),
+                                onTap: (){
+                                  Navigator.pop(context);
+                                  showDialog(
+                                    context: context, 
+                                    builder: (context){
+                                      var c1 = bgcolor;
+                                      return AlertDialog(
+                                        content: MaterialColorPicker(
+                                          onColorChange: (v){
+                                            c1 = '${v.red};${v.green};${v.blue};${v.alpha}';
+                                          },
+                                          selectedColor: Colors.white,
+                                          colors: const [
+                                              Colors.red,
+                                              Colors.yellow,
+                                              Colors.lightGreen,
+                                              Colors.grey,
+                                              Colors.amber,
+                                              Colors.cyan,
+                                              Colors.brown,
+                                              Colors.indigo,
+                                          ],
+                                        ),
+                                        actions: [
+                                          TextButton(
+                                            onPressed: (){
+                                              bgcolor = c1;
+                                              setState(() {
+                                                
+                                              });
+                                              Navigator.pop(context);
+                                            }, 
+                                            child: const Text("Submit")
+                                          )
                                         ],
-                                      ),
-                                      actions: [
-                                        TextButton(
-                                          onPressed: (){
-                                            bgcolor = c1;
+                                      );
+                                  });
+                                },
+                              ),
+                            ),
+                            SizedBox(
+                              width: 250,
+                              height: 50,
+                              child: ListTile(
+                                leading: const Icon(Icons.font_download),
+                                title: Text(font),
+                                onTap: (){
+                                  Navigator.pop(context);
+                                  showDialog(
+                                    context: context, 
+                                    builder: (context){
+                                      return AlertDialog(
+                                        title: const Text("Font Family"),
+                                        content: DropdownButton<String>(
+                                          value: font,
+                                          onChanged: (String? newValue) {
                                             setState(() {
-                                              
+                                              font = newValue!;
                                             });
                                             Navigator.pop(context);
-                                          }, 
-                                          child: const Text("Submit")
-                                        )
-                                      ],
-                                    );
-                                });
-                              },
+                                          },
+                                          items: <String>['inter','Roboto', 'Montserrat', 'Lobster']
+                                              .map<DropdownMenuItem<String>>((String value) {
+                                            return DropdownMenuItem<String>(
+                                              value: value,
+                                              child: Text(value),
+                                            );
+                                          }).toList(),
+                                        ),
+                                      );
+                                    }
+                                  );
+                                  
+                                },
+                              ),
                             ),
-                          ),
-                          SizedBox(
-                            width: 250,
-                            height: 50,
-                            child: ListTile(
-                              leading: const Icon(Icons.font_download),
-                              title: Text(font),
-                              onTap: (){
-                                Navigator.pop(context);
-                                showDialog(
-                                  context: context, 
-                                  builder: (context){
-                                    return AlertDialog(
-                                      title: const Text("Font Family"),
-                                      content: DropdownButton<String>(
-                                        value: font,
-                                        onChanged: (String? newValue) {
-                                          setState(() {
-                                            font = newValue!;
-                                          });
-                                          Navigator.pop(context);
-                                        },
-                                        items: <String>['inter','Roboto', 'Montserrat', 'Lobster']
-                                            .map<DropdownMenuItem<String>>((String value) {
-                                          return DropdownMenuItem<String>(
-                                            value: value,
-                                            child: Text(value),
-                                          );
-                                        }).toList(),
-                                      ),
-                                    );
-                                  }
-                                );
-                                
-                              },
-                            ),
-                          ),
-                          SizedBox(
-                            width: 250,
-                            height: 50,
-                            child: ListTile(
-                              title: const Text("Save"),
-                              leading: const Icon(Icons.save),
-                              onTap: (){
-                                Future.microtask(()async{
-                                  var myModel = Provider.of<CustomProvider>(context,listen: false);
-                                  var crr = jsonDecode(myModel.currentNote!.parseContent().toString());
-                                  // print(crr);
-                                  var sections = [];
-                                  sections.add({"content":crr["sections"][0]["content"]});
-                                  sections.add({"width":bgcolor,"height":font,"alignment":"null"});
-                                  List<int> indexes = [];
-                                  List<dynamic> type = [];
-                                  type.add({"content":"hierarchy"});
-                                  for(int i=0 ; i<temp.length; i++){
-                                    var temp_1 = temp[i];
-                                    for(int j=0 ; j<temp_1.mat.length; j++){
-                                      var temp_2 = temp_1.mat[j];
-                                      for(int k=0 ; k<temp_2.length ; k++){
-                                        var temp_3 = temp_2[k];
-                                        indexes.add((10000000*(i+11)+10000*(j+21)+10*(k+11)));
-                                        var t1 = temp_3.toString().split("-");
-                                        sections.add({"content":t1[0]});
-                                        var t2 = t1[1].split(",");
-                                        sections.add({"width":double.parse(t2[0]),"height":double.parse(t2[1]),"alignment":t2[2]});
-                                        type.add({"content":temp_3.type});
+                            SizedBox(
+                              width: 250,
+                              height: 50,
+                              child: ListTile(
+                                title: const Text("Save"),
+                                leading: const Icon(Icons.save),
+                                onTap: (){
+                                  Future.microtask(()async{
+                                    var myModel = Provider.of<CustomProvider>(context,listen: false);
+                                    var crr = jsonDecode(myModel.currentNote!.parseContent().toString());
+                                    // print(crr);
+                                    var sections = [];
+                                    sections.add({"content":crr["sections"][0]["content"]});
+                                    sections.add({"width":bgcolor,"height":font,"alignment":"null"});
+                                    List<int> indexes = [];
+                                    List<dynamic> type = [];
+                                    type.add({"content":"hierarchy"});
+                                    for(int i=0 ; i<temp.length; i++){
+                                      var temp_1 = temp[i];
+                                      for(int j=0 ; j<temp_1.mat.length; j++){
+                                        var temp_2 = temp_1.mat[j];
+                                        for(int k=0 ; k<temp_2.length ; k++){
+                                          var temp_3 = temp_2[k];
+                                          indexes.add((10000000*(i+11)+10000*(j+21)+10*(k+11)));
+                                          var t1 = temp_3.toString().split("-");
+                                          sections.add({"content":t1[0]});
+                                          var t2 = t1[1].split(",");
+                                          sections.add({"width":double.parse(t2[0]),"height":double.parse(t2[1]),"alignment":t2[2]});
+                                          type.add({"content":temp_3.type});
+                                        }
                                       }
                                     }
-                                  }
-                                  crr["sections"] = sections;
-                                  ReverseNote n1 = ReverseNote(
-                                    id: myModel.currentNote!.id,
-                                    index: indexes, 
-                                    content: sections, 
-                                    type: type
-                                  );
-                                  // print(type);
-                                  myModel.addNote(convertNoteAndHierarchy([n1],null));
-                                  // print(convertNoteAndHierarchy([n1],null)['"note"']);
-                                });
-                                Navigator.pop(context);
-                              },
+                                    crr["sections"] = sections;
+                                    ReverseNote n1 = ReverseNote(
+                                      id: myModel.currentNote!.id,
+                                      index: indexes, 
+                                      content: sections, 
+                                      type: type
+                                    );
+                                    // print(type);
+                                    myModel.addNote(convertNoteAndHierarchy([n1],null));
+                                    // print(convertNoteAndHierarchy([n1],null)['"note"']);
+                                  });
+                                  Navigator.pop(context);
+                                },
+                              )
                             )
-                          )
-                        ],
-                      )
+                          ],
+                        )
+                      ),
+                    );
+                  },
+                );
+              },
+              icon: const Icon(Icons.more_vert)
+            )
+          ],
+        ),
+        body: ListView.builder(
+          itemCount: temp.length + 1,
+          itemBuilder: (context, index) {
+            if (index < temp.length) {
+              return temp[index];
+            } else {
+              return Padding(
+                padding: const EdgeInsets.all(16.0),
+                child: Row(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  mainAxisSize: MainAxisSize.max,
+                  children: [
+                    ElevatedButton.icon(
+                      onPressed: () {
+                        var temp_1 = DRow(
+                            DRowSize(width: MediaQuery.of(context).size.width, height: 120),
+                            index: index);
+                        temp.add(temp_1);
+                        setState(() {});
+                      },
+                      icon: const Icon(Icons.add),
+                      label: const Text("Add Text")
                     ),
-                  );
-                },
+                    const SizedBox(width:12),
+                    ElevatedButton.icon(
+                      onPressed: () {
+                        var temp_1 = DRow(
+                            DRowSize(width: MediaQuery.of(context).size.width, height: 120),
+                            index: index);
+                        temp_1.mat[0][0].type = "media";
+                        temp.add(temp_1);
+                        setState(() {});
+                      },
+                      icon: const Icon(Icons.add),
+                      label: const Text("Add Media"))
+                  ],
+                ),
               );
-            },
-            icon: const Icon(Icons.more_vert)
-          )
-        ],
-      ),
-      body: ListView.builder(
-        itemCount: temp.length + 1,
-        itemBuilder: (context, index) {
-          if (index < temp.length) {
-            return temp[index];
-          } else {
-            return Padding(
-              padding: const EdgeInsets.all(16.0),
-              child: Row(
-                mainAxisAlignment: MainAxisAlignment.center,
-                mainAxisSize: MainAxisSize.max,
-                children: [
-                  ElevatedButton.icon(
-                    onPressed: () {
-                      var temp_1 = DRow(
-                          DRowSize(width: MediaQuery.of(context).size.width, height: 120),
-                          index: index);
-                      temp.add(temp_1);
-                      setState(() {});
-                    },
-                    icon: const Icon(Icons.add),
-                    label: const Text("Add Text")
-                  ),
-                  const SizedBox(width:12),
-                  ElevatedButton.icon(
-                    onPressed: () {
-                      var temp_1 = DRow(
-                          DRowSize(width: MediaQuery.of(context).size.width, height: 120),
-                          index: index);
-                      temp_1.mat[0][0].type = "media";
-                      temp.add(temp_1);
-                      setState(() {});
-                    },
-                    icon: const Icon(Icons.add),
-                    label: const Text("Add Media"))
-                ],
-              ),
-            );
+            }
           }
-        }
-      )
+        )
+      ),
     );
   }
 }
@@ -581,6 +624,31 @@ class DRow extends StatefulWidget {
 class _DRowState extends State<DRow> {
   String _selectedHValue = "H-Center";
   String _selectedVValue = "V-Center";
+  // File? _image;
+
+  Future<void> pickImage(cur) async {
+  final ImagePicker picker = ImagePicker();
+  final XFile? image = await picker.pickImage(source: ImageSource.gallery);
+    if (image != null) {
+      final Uri uri = Uri.parse(mediaUrl);  // Change to your Dart Frog endpoint
+
+    var request = http.MultipartRequest('POST', uri)
+      ..files.add(
+        await http.MultipartFile.fromPath(
+          'photo', // form field name expected by the server
+          image.path,
+        ),
+      );
+
+    var response = await request.send();
+
+    if (response.statusCode == 200) {
+      cur.controller.text = await response.stream.bytesToString();
+    } else {
+      // print('File upload failed with status: ${response.statusCode}');
+    }
+    }
+  }
 
   
 
@@ -656,8 +724,12 @@ class _DRowState extends State<DRow> {
                                                 content: ListTile(
                                                   leading: const Icon(Icons.upload),
                                                   title: const Text("Upload"),
-                                                  onTap: (){
-                                                    
+                                                  onTap: () async{
+                                                    await pickImage(widget.mat[index_1][index_2]);
+                                                    setState(() {
+                                                      
+                                                    });
+                                                    Navigator.pop(context);
                                                   },
                                                 ),
                                               );
@@ -742,6 +814,7 @@ class _DRowState extends State<DRow> {
           var url = Uri.parse(getMediaConstant(myModel.username, newpass.toString(),imageName));
           // print(url);
           var response = await http.get(url);
+
           if (response.statusCode == 200) {
             File file = File('$imagePathConstant/$imageName');
             // print(file);
@@ -831,6 +904,7 @@ class _DRowState extends State<DRow> {
                           selectable: true,
                           data: controller.text,
                           styleSheet: MarkdownStyleSheet(
+                            textAlign: convertAlignmentToWrapAlignment(alignment),
                             h1: TextStyle(fontSize: 32, fontWeight: FontWeight.bold, fontFamily: font),
                             h2: TextStyle(fontSize: 24, fontWeight: FontWeight.w600,  fontFamily: font),
                             h3: TextStyle(fontSize: 20, fontWeight: FontWeight.w500,  fontFamily: font),
@@ -848,6 +922,19 @@ class _DRowState extends State<DRow> {
         ),
       ],
     );
+  }
+
+  WrapAlignment convertAlignmentToWrapAlignment(Alignment alignment) {
+    if (alignment == Alignment.center) {
+      return WrapAlignment.center;
+    } else if (alignment == Alignment.topLeft || alignment == Alignment.centerLeft || alignment == Alignment.bottomLeft) {
+      return WrapAlignment.start;
+    } else if (alignment == Alignment.topRight || alignment == Alignment.centerRight || alignment == Alignment.bottomRight) {
+      return WrapAlignment.end;
+    } else {
+      // Default to WrapAlignment.start if no match found
+      return WrapAlignment.start;
+    }
   }
 
   void modifyChild(index_1, index_2) {

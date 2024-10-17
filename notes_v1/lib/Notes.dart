@@ -1,22 +1,49 @@
+import 'dart:io';
+
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
 import 'package:crypto/crypto.dart';
 import 'package:notes_v1/constants.dart';
+import 'package:notes_v1/helper.dart';
 import 'package:notes_v1/json.dart';
 import 'dart:convert';
 
 import 'package:notes_v1/provider.dart';
 import 'package:provider/provider.dart';
 import 'package:notes_v1/appNoteClasses.dart';
+import 'package:path_provider/path_provider.dart';
+
 
 Future<String> getNotes(username, password) async {
   try {
+    var b = File('$imagePathConstant/js.json').existsSync(); 
+    if(b){
+      // print("kk");
+      return File('$imagePathConstant/js.json').readAsString();
+    }
     var newpass = sha256.convert(utf8.encode(password.toString()));
-    var url = Uri.parse(getNoteConstant(username, newpass.toString()));
+
+    var keys = generateRSAKeyPair();
+
+    var url = Uri.parse(getNoteConstant(username, newpass.toString(),keys.publicKey.modulus.toString(),keys.publicKey.exponent.toString()));
     var response = await http.get(url);
     if (response.statusCode == 200) {
+      if(response.body == 'Invalid') return response.body;
+      // print(response.body);
+      final message = response.body.split("--");
+      // print(message);
+      var temp = [];
+      for(int i=0 ; i<message.length ; i++){
+        try{
+          temp.add(rsaDecrypt(message[i], null, keys.privateKey));
+        }catch (e){
+          // print(e);
+        }
+      }
       // print(newpass);
-      return response.body;
+      // print(temp.join(""));
+      File('$imagePathConstant/js.json').writeAsString(temp.join());
+      return temp.join();
     } else {
       throw Exception('Failed to load data');
     }
@@ -49,10 +76,15 @@ Map<String,Map<String,String>> findNotePlaceholder(currentHierarchy, temp){
       // print(jsonDecode(note.toString())["content"]["sections"][0]["content"]);
       // print("\n");
       if(jsonDecode(note.toString())["content"]["sections"][0]["content"] == temp_1){
-        var p1 = jsonDecode(note.toString())["content"]["sections"][2]["content"];
-        if(p1.length >= 24){
-          p1 = jsonDecode(note.toString())["content"]["sections"][2]["content"].substring(0,24);
-          p1 += "...";
+        var p1;
+        try{
+          p1 = jsonDecode(note.toString())["content"]["sections"][2]["content"];
+          if(p1.length >= 24){
+            p1 = jsonDecode(note.toString())["content"]["sections"][2]["content"].substring(0,24);
+            p1 += "...";
+          }
+        }catch(e){
+          p1 = "nothing";
         }
 
         res[entry.key] = {
@@ -101,7 +133,7 @@ class _NotesHomeState extends State<NotesHome> {
         tagHierarchy!.children.forEach((key, value){
           currentHierarchySiblings.add(key);
         });
-        var temp_1 = findNotePlaceholder(currentHierarchy, temp);
+        var temp_1 = findNotePlaceholder(currentHierarchy, temp); 
         currentNotePlaceHolder = [];
         for(var entry in temp_1.entries){
           String t1 = entry.key;

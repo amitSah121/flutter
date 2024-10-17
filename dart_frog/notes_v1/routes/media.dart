@@ -3,6 +3,7 @@ import 'package:crypto/crypto.dart';
 
 import 'package:dart_frog/dart_frog.dart';
 import 'package:mongo_dart/mongo_dart.dart';
+import 'package:notes_v1/helper_funcs/helper.dart';
 
 Future<Response> onRequest(RequestContext context) async {
   return switch (context.request.method) {
@@ -17,7 +18,7 @@ Future<Response> get_image(RequestContext context) async{
   final request = context.request;
   final params = request.uri.queryParameters;
 
-  final db = Db('mongodb://admin:password@localhost:27017/user_account?authSource=admin');
+  final db = Db(uri);
   await db.open();
   final coll = db.collection('user');
   

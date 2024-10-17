@@ -23,7 +23,7 @@ Future<String> getData(username, password) async {
       throw Exception('Failed to load data');
     }
   } catch (e) {
-    return 'Error: $e';
+    return 'invalid';
   }
 }
 
@@ -134,11 +134,14 @@ class _RegisterState extends State<Register>{
                           try{
                             final val = await getData(username.text, password.text);
                           // use the object id provided by val
-                            print(val);
+                            // print(val);
+                            if(val == "invalid") {
+                              throw Exception("invalid");
+                            }
                             Navigator.pushNamed(context, "/signin");
                           }catch (e) {
                             ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content:Text("Incorrect Username or password")));
-                            print(e);
+                            // print(e);
                           }
                             
                         }
