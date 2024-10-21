@@ -1,7 +1,7 @@
 
 import 'dart:io' show Platform, Directory;
 
-const url = "http://localhost:8080";
+const url = "https://lemonwears.com/api";//"http://localhost:8080";
 
 
 String? imagePathConstant  = ((){
@@ -39,6 +39,6 @@ const notesUrl = "$url/notes";
 
 const mediaUrl = "$url/media";
 
-const getKey(username){
-  return 'http://localhost:8080/test?username=$username';
+String getKey(username){
+  return '$url/test?username=$username';
 }
