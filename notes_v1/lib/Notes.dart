@@ -109,9 +109,9 @@ class NotesHome extends StatefulWidget {
 
 class _NotesHomeState extends State<NotesHome> {
   final GlobalKey<ScaffoldState> _scaffoldKey = GlobalKey<ScaffoldState>();
-  String profileName = 'username';
-  String saved = " saved";
-  IconData icon = Icons.save;
+  // String profileName = 'Save All';
+  // String saved = " status";
+  // IconData icon = Icons.circle_sharp;
   Tag? tagHierarchy;
   List<String> currentHierarchySiblings = [];
   List<String> currentHierarchy = [];
@@ -285,8 +285,9 @@ class _NotesHomeState extends State<NotesHome> {
                 Padding(
                   padding: const EdgeInsets.only(left:16),
                   child: SizedBox(
+                    // decoration: const BoxDecoration(color: Colors.red),
                     width: MediaQuery.of(context).size.width,
-                    height: currentNotePlaceHolder.length*64,
+                    height: currentNotePlaceHolder.length*72,
                     child: ListView.builder(
                       itemCount: currentNotePlaceHolder.length,
                       itemBuilder: (context, index){
@@ -364,7 +365,7 @@ class _NotesHomeState extends State<NotesHome> {
         child: ListView(
           children: [
             ListTile(
-              leading: const Icon(Icons.person_2_rounded),
+              leading: const Icon(Icons.save),
               title: TextButton(
                 onPressed: () {
                   var temp_1 = tagHierarchy!.toFormattedString();
@@ -420,17 +421,17 @@ class _NotesHomeState extends State<NotesHome> {
                     await myModel.update_note(formatednote);
                   });
                 }, 
-                child: Align(
+                child: const Align(
                   alignment: Alignment.centerLeft,
-                  child: Text(profileName),
+                  child: Text('Save All'),
                 ),
               ),
-              subtitle: Padding(
-                padding: const EdgeInsets.only(left:12),
+              subtitle: const Padding(
+                padding: EdgeInsets.only(left:12),
                 child:Row(
                   children:[
-                    Icon(icon, size: 12,),
-                    Text(' $saved', style: const TextStyle(fontSize: 12)),    
+                    Icon(Icons.circle_sharp, size: 12,),
+                    Text(' status', style: const TextStyle(fontSize: 12)),    
                   ],
                 ),
               )
