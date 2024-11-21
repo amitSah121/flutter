@@ -2,6 +2,7 @@ import 'dart:io';
 import 'package:crypto/crypto.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:flutter_image_compress/flutter_image_compress.dart';
 import 'package:flutter_markdown/flutter_markdown.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:notes_v1/appNoteClasses.dart';
@@ -10,6 +11,7 @@ import 'package:path_provider/path_provider.dart';
 import 'dart:convert';
 import 'package:provider/provider.dart';
 import 'package:notes_v1/provider.dart';
+import 'package:path/path.dart' as path;
 import 'package:flutter_material_color_picker/flutter_material_color_picker.dart';
 import 'package:http/http.dart' as http;
 
@@ -626,17 +628,35 @@ class _DRowState extends State<DRow> {
   String _selectedVValue = "V-Center";
   // File? _image;
 
+  Future<String> _compressImage(XFile file) async {
+    // final dir = await getTemporaryDirectory();
+    final targetPath = path.join(imagePathConstant!, path.basename(file.path));
+
+    var result = await FlutterImageCompress.compressAndGetFile(
+      file.path,
+      targetPath,
+      quality: 60, // Adjust compression quality (0-100)
+      // minWidth: 800, // Adjust to your desired minimum width
+      // minHeight: 800, // Adjust to your desired minimum height
+    );
+
+    return targetPath;
+  }
+
+
   Future<void> pickImage(cur) async {
   final ImagePicker picker = ImagePicker();
   final XFile? image = await picker.pickImage(source: ImageSource.gallery);
     if (image != null) {
+      final compressedFilePath = await _compressImage(image);
+
       final Uri uri = Uri.parse(mediaUrl);  // Change to your Dart Frog endpoint
 
     var request = http.MultipartRequest('POST', uri)
       ..files.add(
         await http.MultipartFile.fromPath(
           'photo', // form field name expected by the server
-          image.path,
+          compressedFilePath,
         ),
       );
 
@@ -697,6 +717,7 @@ class _DRowState extends State<DRow> {
                             (widget.mat[index_1].length - 1) * 12,
                         child: ListView.builder(
                           itemCount: widget.mat[index_1].length,
+                          physics: const NeverScrollableScrollPhysics(),
                           itemBuilder: (context, index_2) {
                             
                             return Column(
@@ -941,242 +962,244 @@ class _DRowState extends State<DRow> {
     showDialog(
         context: context,
         builder: (context) {
-          return AlertDialog(
-              alignment: Alignment.center,
-              actionsAlignment: MainAxisAlignment.start,
-              content: Column(
-                mainAxisAlignment: MainAxisAlignment.start,
-                mainAxisSize: MainAxisSize.min,
-                children: [
-                  if (widget.mat[index_1].length == 1)
+          return FittedBox(    
+            child: AlertDialog(
+                alignment: Alignment.center,
+                actionsAlignment: MainAxisAlignment.start,
+                content: Column(
+                  mainAxisAlignment: MainAxisAlignment.start,
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    if (widget.mat[index_1].length == 1)
+                      GestureDetector(
+                        onTap: () {
+                          setState(() {
+                            widget.addHorizontal(index_1);
+                            Navigator.pop(context);
+                          });
+                        },
+                        child: const Row(
+                          children: [Icon(Icons.add), Text("Add Box")],
+                        ),
+                      ),
+                    if (widget.mat[index_1].length == 1)
+                      const SizedBox(
+                        height: 16,
+                      ),
                     GestureDetector(
                       onTap: () {
                         setState(() {
-                          widget.addHorizontal(index_1);
+                          widget.addVertical(index_1, index_2);
                           Navigator.pop(context);
                         });
                       },
                       child: const Row(
-                        children: [Icon(Icons.add), Text("Add Box")],
+                        children: [Icon(Icons.add), Text("Add Column")],
                       ),
                     ),
-                  if (widget.mat[index_1].length == 1)
                     const SizedBox(
                       height: 16,
                     ),
-                  GestureDetector(
-                    onTap: () {
-                      setState(() {
-                        widget.addVertical(index_1, index_2);
-                        Navigator.pop(context);
-                      });
-                    },
-                    child: const Row(
-                      children: [Icon(Icons.add), Text("Add Column")],
-                    ),
-                  ),
-                  const SizedBox(
-                    height: 16,
-                  ),
-                  GestureDetector(
-                    onTap: () {
-                      widget.removeChild(index_1, index_2);
-                      setState(() {
-                        Navigator.pop(context);
-                      });
-                    },
-                    child: const Row(
-                      children: [Icon(Icons.delete), Text("Delete Box")],
-                    ),
-                  ),
-                  const SizedBox(
-                    height: 16,
-                  ),
-                  GestureDetector(
-                    onTap: () {
-                      Clipboard.setData(ClipboardData(
-                          text:
-                              (widget.mat[index_1][index_2].controller).text));
-                      Navigator.pop(context);
-                    },
-                    child: const Row(
-                      children: [Icon(Icons.select_all), Text("SeleteAll")],
-                    ),
-                  ),
-                  const SizedBox(
-                    height: 16,
-                  ),
-                  if(widget.mat[index_1][index_2].type != "media")
                     GestureDetector(
                       onTap: () {
-                        
-                        widget.mat[index_1][index_2].type = "media";
+                        widget.removeChild(index_1, index_2);
                         setState(() {
-                          
+                          Navigator.pop(context);
                         });
+                      },
+                      child: const Row(
+                        children: [Icon(Icons.delete), Text("Delete Box")],
+                      ),
+                    ),
+                    const SizedBox(
+                      height: 16,
+                    ),
+                    GestureDetector(
+                      onTap: () {
+                        Clipboard.setData(ClipboardData(
+                            text:
+                                (widget.mat[index_1][index_2].controller).text));
                         Navigator.pop(context);
                       },
                       child: const Row(
-                        children: [Icon(Icons.change_circle), Text("To Media")],
+                        children: [Icon(Icons.select_all), Text("SeleteAll")],
                       ),
                     ),
-                  if(widget.mat[index_1][index_2].type == "media")
-                    GestureDetector(
-                      onTap: () {
-                        widget.mat[index_1][index_2].type = "text";
-                        setState(() {
-                          
-                        });
-                        Navigator.pop(context);
-                      },
-                      child: const Row(
-                        children: [Icon(Icons.change_circle), Text("To Text")],
-                      ),
+                    const SizedBox(
+                      height: 16,
                     ),
-                  const SizedBox(
-                    height: 16,
-                  ),
-                  Container(
-                    height: 2,
-                    decoration:
-                        BoxDecoration(color: Colors.black.withOpacity(0.3)),
-                  ),
-                  const SizedBox(
-                    height: 16,
-                  ),
-                  Row(
-                    mainAxisAlignment: MainAxisAlignment.start,
-                    mainAxisSize: MainAxisSize.max,
-                    children: [
+                    if(widget.mat[index_1][index_2].type != "media")
                       GestureDetector(
-                          onTap: () {
-                            _selectedHValue = "H-Center";
-                            _selectedVValue = "V-Center";
-                            setState(() {
-                              updateAlignment(index_1, index_2);
-                              Navigator.pop(context);
-                            });
-                          },
-                          child: const Padding(
-                            padding: EdgeInsets.only(left: 12.0),
-                            child: Text("Center"),
-                          )),
-                    ],
-                  ),
-                  const SizedBox(
-                    height: 8,
-                  ),
-                  Row(
+                        onTap: () {
+                          
+                          widget.mat[index_1][index_2].type = "media";
+                          setState(() {
+                            
+                          });
+                          Navigator.pop(context);
+                        },
+                        child: const Row(
+                          children: [Icon(Icons.change_circle), Text("To Media")],
+                        ),
+                      ),
+                    if(widget.mat[index_1][index_2].type == "media")
+                      GestureDetector(
+                        onTap: () {
+                          widget.mat[index_1][index_2].type = "text";
+                          setState(() {
+                            
+                          });
+                          Navigator.pop(context);
+                        },
+                        child: const Row(
+                          children: [Icon(Icons.change_circle), Text("To Text")],
+                        ),
+                      ),
+                    const SizedBox(
+                      height: 16,
+                    ),
+                    Container(
+                      height: 2,
+                      decoration:
+                          BoxDecoration(color: Colors.black.withOpacity(0.3)),
+                    ),
+                    const SizedBox(
+                      height: 16,
+                    ),
+                    Row(
                       mainAxisAlignment: MainAxisAlignment.start,
                       mainAxisSize: MainAxisSize.max,
                       children: [
-                        Row(
-                          children: [
-                            Radio<String>(
-                              value: 'Left',
-                              groupValue: _selectedHValue,
-                              onChanged: (String? value) {
-                                setState(() {
-                                  _selectedHValue = value!;
-                                  updateAlignment(index_1, index_2);
-                                  Navigator.pop(context);
-                                });
-                              },
-                            ),
-                            const Text("Left")
-                          ],
-                        ),
-                        Row(
-                          children: [
-                            Radio<String>(
-                              value: 'H-Center',
-                              groupValue: _selectedHValue,
-                              onChanged: (String? value) {
-                                setState(() {
-                                  _selectedHValue = value!;
-                                  updateAlignment(index_1, index_2);
-                                  Navigator.pop(context);
-                                });
-                              },
-                            ),
-                            const Text("H-Center")
-                          ],
-                        ),
-                        Row(
-                          children: [
-                            Radio<String>(
-                              value: 'Right',
-                              groupValue: _selectedHValue,
-                              onChanged: (String? value) {
-                                setState(() {
-                                  _selectedHValue = value!;
-                                  updateAlignment(index_1, index_2);
-                                  Navigator.pop(context);
-                                });
-                              },
-                            ),
-                            const Text("Right")
-                          ],
-                        )
-                      ]),
-                  const SizedBox(
-                    height: 8,
-                  ),
-                  Row(
-                      mainAxisAlignment: MainAxisAlignment.start,
-                      mainAxisSize: MainAxisSize.max,
-                      children: [
-                        Row(
-                          children: [
-                            Radio<String>(
-                              value: 'Top',
-                              groupValue: _selectedVValue,
-                              onChanged: (String? value) {
-                                setState(() {
-                                  _selectedVValue = value!;
-                                  updateAlignment(index_1, index_2);
-                                  Navigator.pop(context);
-                                });
-                              },
-                            ),
-                            const Text("Top")
-                          ],
-                        ),
-                        Row(
-                          children: [
-                            Radio<String>(
-                              value: 'V-Center',
-                              groupValue: _selectedVValue,
-                              onChanged: (String? value) {
-                                setState(() {
-                                  _selectedVValue = value!;
-                                  updateAlignment(index_1, index_2);
-                                  Navigator.pop(context);
-                                });
-                              },
-                            ),
-                            const Text("V-Center")
-                          ],
-                        ),
-                        Row(
-                          children: [
-                            Radio<String>(
-                              value: 'Bottom',
-                              groupValue: _selectedVValue,
-                              onChanged: (String? value) {
-                                setState(() {
-                                  _selectedVValue = value!;
-                                  updateAlignment(index_1, index_2);
-                                  Navigator.pop(context);
-                                });
-                              },
-                            ),
-                            const Text("Bottom")
-                          ],
-                        )
-                      ]),
-                ],
-              ));
+                        GestureDetector(
+                            onTap: () {
+                              _selectedHValue = "H-Center";
+                              _selectedVValue = "V-Center";
+                              setState(() {
+                                updateAlignment(index_1, index_2);
+                                Navigator.pop(context);
+                              });
+                            },
+                            child: const Padding(
+                              padding: EdgeInsets.only(left: 12.0),
+                              child: Text("Center"),
+                            )),
+                      ],
+                    ),
+                    const SizedBox(
+                      height: 8,
+                    ),
+                    Row(
+                        mainAxisAlignment: MainAxisAlignment.start,
+                        mainAxisSize: MainAxisSize.max,
+                        children: [
+                          Row(
+                            children: [
+                              Radio<String>(
+                                value: 'Left',
+                                groupValue: _selectedHValue,
+                                onChanged: (String? value) {
+                                  setState(() {
+                                    _selectedHValue = value!;
+                                    updateAlignment(index_1, index_2);
+                                    Navigator.pop(context);
+                                  });
+                                },
+                              ),
+                              const Text("Left")
+                            ],
+                          ),
+                          Row(
+                            children: [
+                              Radio<String>(
+                                value: 'H-Center',
+                                groupValue: _selectedHValue,
+                                onChanged: (String? value) {
+                                  setState(() {
+                                    _selectedHValue = value!;
+                                    updateAlignment(index_1, index_2);
+                                    Navigator.pop(context);
+                                  });
+                                },
+                              ),
+                              const Text("H-Center")
+                            ],
+                          ),
+                          Row(
+                            children: [
+                              Radio<String>(
+                                value: 'Right',
+                                groupValue: _selectedHValue,
+                                onChanged: (String? value) {
+                                  setState(() {
+                                    _selectedHValue = value!;
+                                    updateAlignment(index_1, index_2);
+                                    Navigator.pop(context);
+                                  });
+                                },
+                              ),
+                              const Text("Right")
+                            ],
+                          )
+                        ]),
+                    const SizedBox(
+                      height: 8,
+                    ),
+                    Row(
+                        mainAxisAlignment: MainAxisAlignment.start,
+                        mainAxisSize: MainAxisSize.max,
+                        children: [
+                          Row(
+                            children: [
+                              Radio<String>(
+                                value: 'Top',
+                                groupValue: _selectedVValue,
+                                onChanged: (String? value) {
+                                  setState(() {
+                                    _selectedVValue = value!;
+                                    updateAlignment(index_1, index_2);
+                                    Navigator.pop(context);
+                                  });
+                                },
+                              ),
+                              const Text("Top")
+                            ],
+                          ),
+                          Row(
+                            children: [
+                              Radio<String>(
+                                value: 'V-Center',
+                                groupValue: _selectedVValue,
+                                onChanged: (String? value) {
+                                  setState(() {
+                                    _selectedVValue = value!;
+                                    updateAlignment(index_1, index_2);
+                                    Navigator.pop(context);
+                                  });
+                                },
+                              ),
+                              const Text("V-Center")
+                            ],
+                          ),
+                          Row(
+                            children: [
+                              Radio<String>(
+                                value: 'Bottom',
+                                groupValue: _selectedVValue,
+                                onChanged: (String? value) {
+                                  setState(() {
+                                    _selectedVValue = value!;
+                                    updateAlignment(index_1, index_2);
+                                    Navigator.pop(context);
+                                  });
+                                },
+                              ),
+                              const Text("Bottom")
+                            ],
+                          )
+                        ]),
+                  ],
+                )),
+          );
         });
   }
 
